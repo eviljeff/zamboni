@@ -67,6 +67,7 @@ def user_summary(request, user_id):
 @permission_required('AccountLookup', 'View')
 def app_summary(request, addon_id):
     app = get_object_or_404(Addon, pk=addon_id)
+    is_admin = acl.action_allowed(request, 'Users', 'Edit')
     authors = (app.authors.filter(addonuser__role__in=(amo.AUTHOR_ROLE_DEV,
                                                        amo.AUTHOR_ROLE_OWNER))
                           .order_by('display_name'))
@@ -85,7 +86,8 @@ def app_summary(request, addon_id):
                          'purchases': purchases,
                          'payment_methods': _app_pay_methods(app),
                          'refunds': refunds,
-                         'price': price})
+                         'price': price,
+                         'is_admin': is_admin})
 
 
 @login_required
