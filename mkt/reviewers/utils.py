@@ -464,14 +464,19 @@ class ReviewHelper(object):
                                              status__in=amo.REVIEWED_STATUSES)
                                          .exists())
 
+        show_privileged = (not self.version.is_privileged
+                           or acl.action_allowed(self.handler.request, 'Apps',
+                                                 'ReviewPrivileged'))
+
         # Public.
-        if ((self.addon.is_packaged and amo.STATUS_PUBLIC not in file_status)
+        if ((self.addon.is_packaged and amo.STATUS_PUBLIC not in file_status
+             and show_privileged)
             or (not self.addon.is_packaged and
                 self.addon.status != amo.STATUS_PUBLIC)):
             actions['public'] = public
 
         # Reject.
-        if self.addon.is_packaged:
+        if self.addon.is_packaged and show_privileged:
             # Packaged apps reject the file only, or the app itself if there's
             # only a single version.
             if (not multiple_versions and
@@ -480,7 +485,7 @@ class ReviewHelper(object):
                 actions['reject'] = reject
             elif multiple_versions and amo.STATUS_DISABLED not in file_status:
                 actions['reject'] = reject
-        else:
+        elif not self.addon.is_packaged:
             # Hosted apps reject the app itself.
             if self.addon.status not in [amo.STATUS_REJECTED,
                                          amo.STATUS_DISABLED]:
