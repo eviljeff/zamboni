@@ -527,6 +527,13 @@ class WEBAPP_RESUBMIT(_LOG):
     keep = True
     review_queue = True
 
+class ESCALATION_VIP_APP(_LOG):
+    id = 78
+    format = _(u'{addon} auto-escalated because its a VIP app.')
+    short = _(u'VIP auto-escalation')
+    keep = True
+    review_queue = True
+
 
 class CUSTOM_TEXT(_LOG):
     id = 98
