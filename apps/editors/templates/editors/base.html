@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ editor_page_title() }}{% endblock %}
+
+{% block bodyclass %}editor-tools {% endblock %}
+
+{# Don't show the amo header on editor pages #}
+{% set hide_header = True %}
+
+{% block site_header_title %}
+<h1 class="site-title">
+  <a href="{{ url('editors.home') }}" title="{{ _('Return to the Editor Tools homepage') }}">
+    <strong>{{ _('Editor Tools') }}</strong>
+  </a>
+</h1>
+{% endblock %}
+
+{% block extrahead %}
+  {{ css('zamboni/devhub') }}
+  {{ css('zamboni/editors') }}
+{% endblock %}
+
+{% block navbar %}
+<div id="navbar">
+  <ul class="top">
+      <li class="top">
+        <a href="{{ url('editors.queue') }}" class="controller">
+          {{ _('Queues') }}</a>
+        <ul>
+          {% if queue_counts %}
+          <li><a href="{{ url('editors.queue_fast_track') }}">
+                {{ _('Fast Track') }} ({{ queue_counts['fast_track'] }})</a></li>
+          <li><a href="{{ url('editors.queue_nominated') }}">
+                {{ _('Full Reviews') }} ({{ queue_counts['nominated'] }})</a></li>
+          <li><a href="{{ url('editors.queue_pending') }}">
+                {{ _('Pending Updates') }} ({{ queue_counts['pending'] }})</a></li>
+          <li><a href="{{ url('editors.queue_prelim') }}">
+                {{ _('Preliminary Reviews') }} ({{ queue_counts['prelim'] }})</a></li>
+          <li><a href="{{ url('editors.queue_moderated') }}">
+                {{ _('Moderated Reviews') }} ({{ queue_counts['moderated'] }})</a></li>
+          {% endif %}
+        </ul>
+      </li>
+    <li class="top">
+      <a href="{{ url('editors.performance') }}" class="controller">{{ _('Performance') }}</a>
+    </li>
+    <li class="top">
+      <a href="{{ url('editors.reviewlog') }}" class="controller">{{ _('Logs') }}</a>
+      <ul>
+        <li><a href="{{ url('editors.reviewlog') }}">
+          {{ _('Add-on Review Log') }}</a></li>
+        <li><a href="{{ url('editors.eventlog') }}">
+          {{ _('Moderated Review Log') }}</a></li>
+      </ul>
+    </li>
+    <li class="top">
+      <a href="{{ url('editors.motd') }}" class="controller">{{ _('Announcement') }}</a>
+    </li>
+  </ul>
+</div>
+{% endblock %}
+
+{% block js %}
+  {{ js('zamboni/editors') }}
+{% endblock %}
+
+{# Hiding these for the Marketplace Editor Tools until consumer pages are done. #}
+{% block header_search %}{{ super() if not settings.MARKETPLACE }}{% endblock %}
+{% block footer %}{{ super() if not settings.MARKETPLACE }}{% endblock %}
+
+{% block outer_content %}
+  {% block breadcrumbs %}{% endblock %}
+  {% include "editors/includes/daily-message.html" %}
+  {% include "messages.html" %}
+{% endblock %}

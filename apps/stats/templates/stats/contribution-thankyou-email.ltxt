@@ -1,0 +1,5 @@
+{# L10n: This is an email.  Whitespace matters! #}{% load i18n %}
+{{ thankyou_note }}
+
+{% blocktrans %}Learn more about the future of {{ addon_name }} by clicking here:{% endblocktrans %}
+{{ learn_url }}
