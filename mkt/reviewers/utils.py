@@ -299,7 +299,7 @@ class ReviewApp(ReviewBase):
             RereviewQueue.objects.filter(addon=self.addon).delete()
 
         self.create_note(amo.LOG.REJECT_VERSION)
-        self.notify_email('pending_to_sandbox',
+        self.notify_email('pending_to_reject',
                           u'Your submission has been rejected: %s')
 
         log.info(u'Making %s disabled' % self.addon)

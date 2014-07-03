@@ -4,7 +4,7 @@ Congratulations! {{ name }} has been approved.
 
 Check it out: {{ detail_url }}
 
-Your app is now public but not listed in search results or category listing pages. Only those with the URL can find and install your app.
+Your app is now approved but not published on category listing pages or in search results. Only those with the URL can find and install your app.
 
 If you would like your app included in search results and listing pages visit its Manage Status page: {{ status_url }}.
 
