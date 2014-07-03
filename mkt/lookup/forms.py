@@ -10,7 +10,7 @@ import amo
 STATUS_CHOICES = []
 for status in amo.MARKET_STATUSES:
     STATUS_CHOICES.append((amo.STATUS_CHOICES_API[status],
-                           amo.MKT_STATUS_CHOICES[status]))
+                           amo.STATUS_CHOICES[status]))
 
 FILE_STATUS_CHOICES = []
 for status in amo.MARKET_STATUSES:

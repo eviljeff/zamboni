@@ -24,7 +24,7 @@ log = logging.getLogger('z.reviewers.forms')
 STATUS_CHOICES = [('any', _lazy(u'Any Status'))]
 for status in amo.WEBAPPS_UNLISTED_STATUSES + (amo.STATUS_PUBLIC,):
     STATUS_CHOICES.append((amo.STATUS_CHOICES_API[status],
-                           amo.MKT_STATUS_CHOICES[status]))
+                           amo.STATUS_CHOICES[status]))
 
 
 log = logging.getLogger('z.reviewers.forms')

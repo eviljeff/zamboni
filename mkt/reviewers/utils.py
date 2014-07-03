@@ -189,11 +189,9 @@ class ReviewApp(ReviewBase):
         self.data = data
         self.files = self.version.files.all()
 
-    def process_public(self):
+    def process_approve(self):
         """
-        Makes an app public or approved.
-        Changes status to Public/Public Waiting.
-        Creates Approval note/email.
+        Handle the approval of apps and/or files.
         """
         if self.addon.has_incomplete_status():
             # Failsafe.
@@ -202,9 +200,9 @@ class ReviewApp(ReviewBase):
         # Hold onto the status before we change it.
         status = self.addon.status
         if self.addon.make_public == amo.PUBLIC_IMMEDIATELY:
-            self._process_public_immediately()
+            self._process_public()
         else:
-            self._process_approved()
+            self._process_private()
 
         if self.in_escalate:
             EscalationQueue.objects.filter(addon=self.addon).delete()
@@ -217,26 +215,27 @@ class ReviewApp(ReviewBase):
         return ReviewerScore.award_points(self.request.amo_user, self.addon,
                                           status)
 
-    def _process_approved(self):
-        """Make an app approved."""
+    def _process_private(self):
+        """Make an app private."""
         if self.addon.has_incomplete_status():
             # Failsafe.
             return
 
         self.addon.sign_if_packaged(self.version.pk)
         self.set_files(amo.STATUS_APPROVED, self.version.files.all())
-        if self.addon.status != amo.STATUS_PUBLIC:
+        if self.addon.status not in (amo.STATUS_PUBLIC,
+                                     amo.STATUS_UNPUBLISHED):
             self.set_addon(status=amo.STATUS_APPROVED,
                            highest_status=amo.STATUS_APPROVED)
         self.set_reviewed()
 
         self.create_note(amo.LOG.APPROVE_VERSION_WAITING)
         self.notify_email('pending_to_approved',
-                          u'App approved but waiting: %s')
+                          u'App approved but private: %s')
 
         log.info(u'Making %s approved' % self.addon)
 
-    def _process_public_immediately(self):
+    def _process_public(self):
         """Changes status to Public."""
         if self.addon.has_incomplete_status():
             # Failsafe.
@@ -246,7 +245,8 @@ class ReviewApp(ReviewBase):
         # Save files first, because set_addon checks to make sure there
         # is at least one public file or it won't make the addon public.
         self.set_files(amo.STATUS_PUBLIC, self.version.files.all())
-        if self.addon.status != amo.STATUS_PUBLIC:
+        if self.addon.status not in (amo.STATUS_PUBLIC,
+                                     amo.STATUS_UNPUBLISHED):
             self.set_addon(status=amo.STATUS_PUBLIC,
                            highest_status=amo.STATUS_PUBLIC)
         self.set_reviewed()
@@ -420,7 +420,7 @@ class ReviewHelper(object):
     def get_actions(self):
         """Get the appropriate handler based on the action."""
         public = {
-            'method': self.handler.process_public,
+            'method': self.handler.process_approve,
             'minimal': False,
             'label': _lazy(u'Approve'),
             'details': _lazy(u'This will approve the app and allow the '

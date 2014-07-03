@@ -1304,7 +1304,7 @@ class TestReviewApp(AppReviewerTest, AccessMixin, AttachmentManagementMixin,
 
         eq_(len(mail.outbox), 1)
         msg = mail.outbox[0]
-        self._check_email(msg, 'App approved but waiting')
+        self._check_email(msg, 'App approved but private')
         self._check_email_body(msg)
 
         assert not storefront_mock.called
@@ -1561,7 +1561,7 @@ class TestReviewApp(AppReviewerTest, AccessMixin, AttachmentManagementMixin,
 
         eq_(len(mail.outbox), 1)
         msg = mail.outbox[0]
-        self._check_email(msg, 'App approved but waiting')
+        self._check_email(msg, 'App approved but private')
         self._check_email_body(msg)
         self._check_score(amo.REVIEWED_WEBAPP_HOSTED)
 
@@ -1628,6 +1628,55 @@ class TestReviewApp(AppReviewerTest, AccessMixin, AttachmentManagementMixin,
         app = self.get_app()
         new_version.reload()
         eq_(app.status, amo.STATUS_PUBLIC)
+        self.assertCloseToNow(new_version.reviewed)
+        eq_(new_version.files.all()[0].status, amo.STATUS_PUBLIC)
+        self._check_log(amo.LOG.APPROVE_VERSION)
+
+        eq_(len(mail.outbox), 1)
+        msg = mail.outbox[0]
+        self._check_email(msg, 'App approved')
+        self._check_email_body(msg)
+        self._check_score(amo.REVIEWED_WEBAPP_UPDATE)
+
+        eq_(sign_app_mock.call_count, 1)
+        eq_(update_name.call_count, 1)
+        eq_(update_locales.call_count, 1)
+        eq_(index_webapps.delay.call_count, 1)
+        eq_(update_cached_manifests.delay.call_count, 1)
+        eq_(storefront_mock.call_count, 1)
+
+    @mock.patch('mkt.webapps.models.Webapp.set_iarc_storefront_data')
+    @mock.patch('mkt.webapps.tasks.index_webapps')
+    @mock.patch('mkt.webapps.tasks.update_cached_manifests')
+    @mock.patch('mkt.webapps.models.Webapp.update_supported_locales')
+    @mock.patch('mkt.webapps.models.Webapp.update_name_from_package_manifest')
+    @mock.patch('lib.crypto.packaged.sign_app')
+    def test_packaged_multiple_versions_unpublished_approve(
+        self, sign_app_mock, update_name, update_locales,
+        update_cached_manifests, index_webapps, storefront_mock):
+        """
+        Test approving a version on an unpublished app keeps the app in
+        unpublished status.
+        """
+        self.app.update(status=amo.STATUS_UNPUBLISHED, is_packaged=True)
+        self.app.latest_version.files.update(status=amo.STATUS_PUBLIC)
+        new_version = version_factory(addon=self.app,
+                                      file_kw={'status': amo.STATUS_PENDING})
+
+        index_webapps.delay.reset_mock()
+        eq_(sign_app_mock.call_count, 0)
+        eq_(update_name.call_count, 0)
+        eq_(update_locales.call_count, 0)
+        eq_(update_cached_manifests.delay.call_count, 0)
+        eq_(storefront_mock.call_count, 0)
+
+        data = {'action': 'public', 'device_types': '', 'browsers': '',
+                'comments': 'something'}
+        data.update(self._attachment_management_form(num=0))
+        self.post(data)
+        app = self.get_app()
+        new_version.reload()
+        eq_(app.status, amo.STATUS_UNPUBLISHED)
         self.assertCloseToNow(new_version.reviewed)
         eq_(new_version.files.all()[0].status, amo.STATUS_PUBLIC)
         self._check_log(amo.LOG.APPROVE_VERSION)
