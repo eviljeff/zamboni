@@ -586,7 +586,7 @@ class Webapp(UUIDModelMixin, amo.models.OnChangeMixin, amo.models.ModelBase):
 
         # Update or NULL out various fields.
         models.signals.pre_delete.send(sender=Webapp, instance=self)
-        self.update(status=amo.STATUS_DELETED, slug=None, app_slug=None,
+        self.update(status=amo.STATUS_DELETED, app_slug=self.id,
                     app_domain=None, _current_version=None)
         models.signals.post_delete.send(sender=Webapp, instance=self)
 
