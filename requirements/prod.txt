@@ -104,7 +104,7 @@ urllib3==1.8.2
 -e git+https://github.com/washort/nuggets.git@02798dfce84030fca64775eaf56e92400f394e4f#egg=nuggets
 -e git+https://github.com/mozilla/django-session-csrf@f00ad913c62e139d36078e8a7e07dab65a021386#egg=django-session-csrf
 -e git+https://github.com/washort/django-browserid.git@5a6ebfa#egg=django-browserid
--e git+https://github.com/washort/django-cache-machine@b7a8d44ba60c44c5bd0aaae410b54d4712881f83#egg=django-cache-machine
+-e git+https://github.com/robhudson/django-cache-machine@44789512e21a631cca039a3dfe77a37281740513#egg=django-cache-machine
 ## Forked.
 -e git+https://github.com/andymckay/django-uuidfield.git@029dd1263794ec36c327617cd6c2346da81c8c33#egg=django-uuidfield
 -e git+https://github.com/washort/django-mysql-pool.git@76ed372bb9888d46833345ae6c40a39d41b5ba62#egg=django-mysql-pool
