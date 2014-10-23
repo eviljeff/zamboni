@@ -955,7 +955,7 @@ NOSE_ARGS = [
     # Stops nose always adding lib into the path, which then breaks crypto
     # imports.
     '-P',
-    '--with-fixture-bundling',
+#    '--with-fixture-bundling',
 ]
 
 # The payment providers supported.
