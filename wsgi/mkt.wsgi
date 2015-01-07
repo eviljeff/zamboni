@@ -19,9 +19,9 @@ site.addsitedir(os.path.abspath(os.path.join(wsgidir, '../')))
 import manage  # flake8: noqa
 
 import django.conf
-import django.core.handlers.wsgi
 import django.core.management
 import django.utils
+from django.core.wsgi import get_wsgi_application
 
 # Do validate and activate translations like using `./manage.py runserver`.
 # http://blog.dscpl.com.au/2010/03/improved-wsgi-script-for-use-with.html
@@ -31,7 +31,7 @@ command = utility.fetch_command('runserver')
 command.validate()
 
 # This is what mod_wsgi runs.
-django_app = django.core.handlers.wsgi.WSGIHandler()
+django_app = get_wsgi_application()
 
 newrelic_ini = getattr(django.conf.settings, 'NEWRELIC_INI', None)
 load_newrelic = False
