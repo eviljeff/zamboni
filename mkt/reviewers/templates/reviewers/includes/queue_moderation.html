@@ -17,13 +17,12 @@
         </div>
         <h3>
           <a href="{{ review.instance.addon.get_url_path() }}">{{ review.instance.addon.name }}</a>
-          <span>{%- if review.instance.title %}: {{ review.instance.title }}{% endif %}</span>
         </h3>
         <p>
           {% trans user=review.instance.user.username,
                    date=review.instance.created|datetime,
                    stars=review.instance.rating|stars,
-                   locale=review.instance.title.locale %}
+                   locale=review.instance.body.locale %}
             by {{ user }} on {{ date }}
             {{ stars }} ({{ locale }})
           {% endtrans %}

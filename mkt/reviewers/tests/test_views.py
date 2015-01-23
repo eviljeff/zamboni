@@ -4025,7 +4025,7 @@ class TestReviewTranslate(RestOAuth):
         self.create_switch('reviews-translate')
         user = UserProfile.objects.create(username='diego')
         app = mkt.site.tests.app_factory(slug='myapp')
-        self.review = app.reviews.create(title=u'yes', body=u'oui',
+        self.review = app.reviews.create(body=u'oui',
                                          addon=app, user=user,
                                          editorreview=True, rating=4)
 
@@ -4055,7 +4055,7 @@ class TestReviewTranslate(RestOAuth):
                       args=[review.addon.slug, review.id, 'fr'])
         res = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         eq_(res.status_code, 200)
-        eq_(res.content, '{"body": "oui", "title": "oui"}')
+        eq_(res.content, '{"body": "oui"}')
 
     @mock.patch('mkt.reviewers.views.requests')
     def test_invalid_api_key(self, requests):

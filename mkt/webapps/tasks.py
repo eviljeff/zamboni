@@ -1028,7 +1028,7 @@ def generate_ratings(app, num):
             display_name=email)
         Review.objects.create(
             addon=app, user=user, rating=random.randrange(0, 6),
-            title="Test Review " + str(n), body="review text")
+            body="review text")
 
 
 def generate_hosted_app(name, category):

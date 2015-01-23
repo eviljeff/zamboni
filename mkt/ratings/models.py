@@ -54,7 +54,6 @@ class Review(ModelBase):
                                  related_name='replies', db_column='reply_to')
 
     rating = models.PositiveSmallIntegerField(null=True)
-    title = TranslatedField(require_locale=False)
     body = TranslatedField(require_locale=False)
     ip_address = models.CharField(max_length=255, default='0.0.0.0')
 
@@ -193,7 +192,6 @@ def check_spam(review_id, **kw):
         bleach.url_re.search(review.body.localized_string)):
         spam.add(review, 'urls')
     for other in others:
-        if ((review.title and review.title == other.title) or
-            review.body == other.body):
+        if review.body == other.body:
             spam.add(review, 'matches')
             break

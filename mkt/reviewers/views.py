@@ -943,22 +943,15 @@ def review_translate(request, addon_slug, review_pk, language):
         language = language.split('-')[0]
 
     if request.is_ajax():
-        title = ''
         body = ''
         status = 200
-
-        if review.title is not None:
-            title, r = _retrieve_translation(review.title, language)
-            if r.status_code != 200:
-                status = r.status_code
 
         if review.body is not None:
             body, r = _retrieve_translation(review.body, language)
             if r.status_code != 200:
                 status = r.status_code
 
-        return http.HttpResponse(json.dumps({'title': title, 'body': body}),
-                                 status=status)
+        return http.HttpResponse(json.dumps({'body': body}), status=status)
     else:
         return redirect(settings.GOOGLE_TRANSLATE_REDIRECT_URL.format(
             lang=language, text=review.body))

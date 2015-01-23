@@ -38,8 +38,7 @@ class BaseReviewFlagFormSet(BaseModelFormSet):
                 if action == REVIEW_MODERATE_DELETE:
                     review.delete()
                     mkt.log(mkt.LOG.DELETE_REVIEW, addon, review,
-                            details=dict(title=unicode(review.title),
-                                         body=unicode(review.body),
+                            details=dict(body=unicode(review.body),
                                          addon_id=addon.id,
                                          addon_title=unicode(addon.name),
                                          is_flagged=is_flagged))
@@ -50,8 +49,7 @@ class BaseReviewFlagFormSet(BaseModelFormSet):
                     review.editorreview = False
                     review.save()
                     mkt.log(mkt.LOG.APPROVE_REVIEW, addon, review,
-                            details=dict(title=unicode(review.title),
-                                         body=unicode(review.body),
+                            details=dict(body=unicode(review.body),
                                          addon_id=addon.id,
                                          addon_title=unicode(addon.name),
                                          is_flagged=is_flagged))

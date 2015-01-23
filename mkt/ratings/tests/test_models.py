@@ -15,8 +15,8 @@ class TestSpamTest(mkt.site.tests.TestCase):
     def setUp(self):
         self.app = Webapp.objects.get(pk=337141)
         self.user = UserProfile.objects.get(pk=31337)
-        Review.objects.create(addon=self.app, user=self.user, title="review 1")
-        Review.objects.create(addon=self.app, user=self.user, title="review 2")
+        Review.objects.create(addon=self.app, user=self.user)
+        Review.objects.create(addon=self.app, user=self.user)
 
     def test_create_not_there(self):
         Review.objects.all().delete()
