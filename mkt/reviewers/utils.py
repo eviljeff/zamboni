@@ -194,7 +194,7 @@ class ReviewBase(object):
         log.info(u'Sending request for information for %s to %s' %
                  (self.addon, emails))
 
-        # Create thread.
+        # Create thread. ##change me##
         self.notify_email('info', u'More information needed to review: %s')
 
 
@@ -464,10 +464,11 @@ class ReviewHelper(object):
                              u'published.')}
         info = {
             'method': self.handler.request_information,
-            'label': _lazy(u'Request more information'),
+            'label': _lazy(u'Message Developer'),
             'minimal': True,
-            'details': _lazy(u'This will send the author(s) an email '
-                             u'requesting more information.')}
+            'details': _lazy(u'This will send the author(s) - and other thread '
+                             u'subscribers - a message, but not change the '
+                             u'app\'s status.')}
         escalate = {
             'method': self.handler.process_escalate,
             'label': _lazy(u'Escalate'),
@@ -477,10 +478,11 @@ class ReviewHelper(object):
                              u'not the author(s).')}
         comment = {
             'method': self.handler.process_comment,
-            'label': _lazy(u'Comment'),
+            'label': _lazy(u'Private Comment'),
             'minimal': True,
-            'details': _lazy(u'Make a comment on this app.  The author(s) '
-                             u'won\'t be able to see these comments.')}
+            'details': _lazy(u'Make a private reviewer comment on this app.  '
+                             u'The message won\'t be visible to the author(s), '
+                             u'and no notification will be sent them.')}
         clear_escalation = {
             'method': self.handler.process_clear_escalation,
             'label': _lazy(u'Clear Escalation'),

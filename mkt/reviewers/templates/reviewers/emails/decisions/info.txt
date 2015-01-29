@@ -6,7 +6,7 @@ App: {{ name }}
 URL: {{ detail_url }}
 
 Reviewer comments {% if waffle.switch('comm-dashboard') %} - {{ ('/comm/thread/' + thread_id)|absolutify }} {% endif %}
-
+##change me##
 Please reply to this email with the following information:
 {{ comments }}
 
