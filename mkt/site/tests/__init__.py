@@ -347,6 +347,16 @@ class TestCase(MockEsMixin, RedisTest, MockBrowserIdMixin, test.TestCase):
     """Base class for all mkt tests."""
     client_class = TestClient
 
+    @classmethod
+    def setUpClass(cls):
+        super(TestCase, cls).setUpClass()
+        cls.setUpTestData()
+
+    @classmethod
+    def setUpTestData(cls):
+        """Load initial data for the TestCase"""
+        pass
+
     def shortDescription(self):
         # Stop nose using the test docstring and instead the test method name.
         pass
