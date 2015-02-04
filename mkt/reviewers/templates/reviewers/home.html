@@ -9,6 +9,7 @@
     {{ reviewers_score_bar(types=point_types) }}
   </section>
 
+  {% if full_reviewer %}
   <section class="island mobile-island">
     <div class="featured" id="editors-stats-charts">
       <div class="listing-header c">
@@ -61,6 +62,7 @@
       </div>
     </div>
   </section>
+  {% endif %}
 
   <section class="island mobile-island c">
     <div class="featured" id="editors-stats">

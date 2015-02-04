@@ -539,7 +539,6 @@ class TestAppQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(0)').text(), u'Apps (2)')
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (1)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
-        eq_(doc('.tabnav li a:eq(3)').text(), u'Moderated Reviews (0)')
 
     def test_queue_count_senior_reviewer(self):
         self.login_as_senior_reviewer()
@@ -550,7 +549,6 @@ class TestAppQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (1)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
         eq_(doc('.tabnav li a:eq(3)').text(), u'Escalations (0)')
-        eq_(doc('.tabnav li a:eq(4)').text(), u'Moderated Reviews (0)')
 
     def test_escalated_not_in_queue(self):
         self.login_as_senior_reviewer()
@@ -569,7 +567,6 @@ class TestAppQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (1)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
         eq_(doc('.tabnav li a:eq(3)').text(), u'Escalations (1)')
-        eq_(doc('.tabnav li a:eq(4)').text(), u'Moderated Reviews (0)')
 
     def test_incomplete_no_in_queue(self):
         [app.update(status=mkt.STATUS_NULL) for app in self.apps]
@@ -747,7 +744,6 @@ class TestRereviewQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(0)').text(), u'Apps (0)')
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (3)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
-        eq_(doc('.tabnav li a:eq(3)').text(), u'Moderated Reviews (0)')
 
     def test_queue_count_senior_reviewer(self):
         self.login_as_senior_reviewer()
@@ -758,7 +754,6 @@ class TestRereviewQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (3)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
         eq_(doc('.tabnav li a:eq(3)').text(), u'Escalations (0)')
-        eq_(doc('.tabnav li a:eq(4)').text(), u'Moderated Reviews (0)')
 
     def test_escalated_not_in_queue(self):
         self.login_as_senior_reviewer()
@@ -778,7 +773,6 @@ class TestRereviewQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (2)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
         eq_(doc('.tabnav li a:eq(3)').text(), u'Escalations (1)')
-        eq_(doc('.tabnav li a:eq(4)').text(), u'Moderated Reviews (0)')
 
     def test_addon_deleted(self):
         app = self.apps[0]
@@ -898,7 +892,6 @@ class TestUpdateQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(0)').text(), u'Apps (0)')
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (0)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (2)')
-        eq_(doc('.tabnav li a:eq(3)').text(), u'Moderated Reviews (0)')
 
     def test_queue_count_senior_reviewer(self):
         self.login_as_senior_reviewer()
@@ -909,7 +902,6 @@ class TestUpdateQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (0)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (2)')
         eq_(doc('.tabnav li a:eq(3)').text(), u'Escalations (0)')
-        eq_(doc('.tabnav li a:eq(4)').text(), u'Moderated Reviews (0)')
 
     def test_escalated_not_in_queue(self):
         self.login_as_senior_reviewer()
@@ -928,7 +920,6 @@ class TestUpdateQueue(AppReviewerTest, AccessMixin, FlagsMixin, SearchMixin,
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (0)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (1)')
         eq_(doc('.tabnav li a:eq(3)').text(), u'Escalations (1)')
-        eq_(doc('.tabnav li a:eq(4)').text(), u'Moderated Reviews (0)')
 
     def test_order(self):
         self.apps[0].update(created=self.days_ago(10))
@@ -1213,7 +1204,6 @@ class TestEscalationQueue(AppReviewerTest, AccessMixin, FlagsMixin,
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (0)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
         eq_(doc('.tabnav li a:eq(3)').text(), u'Escalations (3)')
-        eq_(doc('.tabnav li a:eq(4)').text(), u'Moderated Reviews (0)')
 
     def test_addon_deleted(self):
         app = self.apps[0]
@@ -3312,30 +3302,34 @@ class TestReviewAppComm(AppReviewerTest, AttachmentManagementMixin):
         eq_(note.body, 'rubesh\n\nTested on iFun with FurFocks')
 
 
-class TestModeratedQueue(AppReviewerTest, AccessMixin):
-    fixtures = fixture('user_2519')
+class TestModeratedQueue(mkt.site.tests.TestCase, AccessMixin):
 
     def setUp(self):
         super(TestModeratedQueue, self).setUp()
+
         self.app = app_factory()
 
-        self.reviewer = self.reviewer_user
-        self.users = list(UserProfile.objects.exclude(pk=self.reviewer.id))
+        self.moderator_user = user_factory(username='moderator')
+        self.grant_permission(self.moderator_user, 'Apps:ModerateReview')
+        user_factory(username='regular')
+
+        user1 = user_factory()
+        user2 = user_factory()
 
         self.url = reverse('reviewers.apps.queue_moderated')
 
         self.review1 = Review.objects.create(addon=self.app, body='body',
-                                             user=self.users[0], rating=3,
+                                             user=user1, rating=3,
                                              editorreview=True)
         ReviewFlag.objects.create(review=self.review1, flag=ReviewFlag.SPAM,
-                                  user=self.users[0])
+                                  user=user1)
         self.review2 = Review.objects.create(addon=self.app, body='body',
-                                             user=self.users[1], rating=4,
+                                             user=user2, rating=4,
                                              editorreview=True)
         ReviewFlag.objects.create(review=self.review2, flag=ReviewFlag.SUPPORT,
-                                  user=self.users[1])
+                                  user=user2)
 
-        self.client.login(username=self.reviewer.email, password='password')
+        self.login(self.moderator_user)
 
     def _post(self, action):
         ctx = self.client.get(self.url).context
@@ -3388,20 +3382,17 @@ class TestModeratedQueue(AppReviewerTest, AccessMixin):
         r = self.client.get(self.url)
         eq_(r.status_code, 200)
         doc = pq(r.content)
-        eq_(doc('.tabnav li a:eq(0)').text(), u'Apps (0)')
-        eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (0)')
-        eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
-        eq_(doc('.tabnav li a:eq(3)').text(), u'Moderated Reviews (2)')
+        eq_(doc('.tabnav li a:eq(0)').text(), u'Moderated Reviews (2)')
 
-    def test_queue_count_senior_reviewer(self):
-        self.login_as_senior_reviewer()
+    def test_queue_count_reviewer_and_moderator(self):
+        self.grant_permission(self.moderator_user, 'Apps:Review')
         r = self.client.get(self.url)
         eq_(r.status_code, 200)
         doc = pq(r.content)
         eq_(doc('.tabnav li a:eq(0)').text(), u'Apps (0)')
         eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (0)')
         eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
-        eq_(doc('.tabnav li a:eq(3)').text(), u'Escalations (0)')
+        eq_(doc('.tabnav li a:eq(3)').text(), u'Reviewing (0)')
         eq_(doc('.tabnav li a:eq(4)').text(), u'Moderated Reviews (2)')
 
     def test_deleted_app(self):
@@ -3415,10 +3406,7 @@ class TestModeratedQueue(AppReviewerTest, AccessMixin):
         r = self.client.get(self.url)
         eq_(r.status_code, 200)
         doc = pq(r.content)
-        eq_(doc('.tabnav li a:eq(0)').text(), u'Apps (0)')
-        eq_(doc('.tabnav li a:eq(1)').text(), u'Re-reviews (0)')
-        eq_(doc('.tabnav li a:eq(2)').text(), u'Updates (0)')
-        eq_(doc('.tabnav li a:eq(3)').text(), u'Moderated Reviews (0)')
+        eq_(doc('.tabnav li a:eq(0)').text(), u'Moderated Reviews (0)')
 
 
 class TestGetSigned(BasePackagedAppTest, mkt.site.tests.TestCase):
@@ -4141,14 +4129,21 @@ class TestReviewHistory(mkt.site.tests.TestCase, CommTestMixin):
             self.addon.app_slug)
 
 
-class ModerateLogTest(AppReviewerTest):
+class ModerateLogTest(mkt.site.tests.TestCase):
 
     def setUp(self):
         super(ModerateLogTest, self).setUp()
         self.review = Review.objects.create(addon=app_factory(), body='body',
                                             user=user_factory(), rating=4,
                                             editorreview=True)
-        mkt.set_user(UserProfile.objects.get(username='editor'))
+        self.moderator_user = user_factory(username='moderator')
+        self.grant_permission(self.moderator_user, 'Apps:ModerateReview')
+        mkt.set_user(self.moderator_user)
+        self.login(self.moderator_user)
+
+        self.admin_user = user_factory(username='admin')
+        self.grant_permission(self.admin_user, '*:*')
+        user_factory(username='regular')
 
 
 class TestModerateLog(ModerateLogTest, AccessMixin):
@@ -4234,7 +4229,7 @@ class TestModerateLogDetail(ModerateLogTest, AccessMixin):
         e_id = mkt.log(mkt.LOG.DELETE_REVIEW, self.review.addon, self.review).id
         self.review.delete()
         self.client.logout()
-        self.login_as_admin()
+        self.login(self.admin_user)
         r = self.client.post(self._url(e_id), {'action': 'undelete'})
         eq_(r.status_code, 302)
         self.review = Review.objects.get(id=self.review.id)
