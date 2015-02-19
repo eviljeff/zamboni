@@ -156,7 +156,7 @@ def browserid_authenticate(request, assertion, is_mobile=False,
 
 @csrf_exempt
 @require_POST
-@transaction.commit_on_success
+@transaction.atomic
 def browserid_login(request, browserid_audience=None):
     msg = ''
     if request.user.is_authenticated():

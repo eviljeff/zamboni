@@ -43,7 +43,7 @@ def autocreate_username(candidate, tries=1):
     return adjusted_u
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def create_user(email, group_name=None, overwrite=False,
                 oauth_key=None, oauth_secret=None):
     """Create an user if he doesn't exist already, assign him to a group and

@@ -102,7 +102,7 @@ def manifest(request):
     if (request.method == 'POST' and form.is_valid()
             and features_form_valid):
 
-        with transaction.commit_on_success():
+        with transaction.atomic():
             upload = form.cleaned_data['upload']
             addon = Webapp.from_upload(upload, is_packaged=form.is_packaged())
 
