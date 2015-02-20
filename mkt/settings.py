@@ -1002,7 +1002,7 @@ READ_ONLY = False
 
 REDIS_BACKENDS = {
     'master': {
-        'HOST': 'localhost',
+        'HOST': os.environ.get('REDIS_HOST', 'localhost'),
         'PORT': '6379',
         'OPTIONS': {
             'socket_timeout': '0.5',
