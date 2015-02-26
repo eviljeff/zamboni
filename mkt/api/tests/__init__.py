@@ -1,9 +1,9 @@
 import json
 
-from mkt.site.tests import TestCase
+from mkt.site.tests import TestCase2
 
 
-class BaseAPI(TestCase):
+class BaseAPI(TestCase2):
     """
     A base test case useful for API testing.
     """

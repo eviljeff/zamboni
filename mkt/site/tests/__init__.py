@@ -9,10 +9,12 @@ from functools import partial
 from urlparse import SplitResult, urlsplit, urlunsplit
 
 from django import forms, test
+from django.db import connections, transaction, DEFAULT_DB_ALIAS
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
 from django.core.files.storage import default_storage as storage
+from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test.client import Client, RequestFactory
 from django.utils import translation
@@ -344,7 +346,86 @@ class MockBrowserIdMixin(object):
 JINJA_INSTRUMENTED = False
 
 
-class TestCase(MockEsMixin, RedisTest, MockBrowserIdMixin, test.TestCase):
+class ClassFixtureTestCase(test.TestCase):
+    fixtures = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cls_atomics = cls._enter_atomics()
+
+        if cls.fixtures:
+            for db_name in cls._databases_names(include_mirrors=False):
+                    try:
+                        call_command('loaddata', *cls.fixtures, **{
+                            'verbosity': 0,
+                            'commit': False,
+                            'database': db_name,
+                        })
+                    except Exception:
+                        cls._rollback_atomics(cls.cls_atomics)
+                        raise
+        cls.setUpTestData()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._rollback_atomics(cls.cls_atomics)
+        for conn in connections.all():
+            conn.close()
+
+    @classmethod
+    def _databases_names(cls, include_mirrors=True):
+        # If the test case has a multi_db=True flag, act on all databases,
+        # including mirrors or not. Otherwise, just on the default DB.
+        if getattr(cls, 'multi_db', False):
+            return [alias for alias in connections
+                    if (include_mirrors or
+                        connections[alias].settings_dict['TEST']['MIRROR'])]
+        else:
+            return [DEFAULT_DB_ALIAS]
+
+    @classmethod
+    def _enter_atomics(cls):
+        """Helper method to open atomic blocks for multiple databases"""
+        atomics = {}
+        for db_name in cls._databases_names():
+            atomics[db_name] = transaction.atomic(using=db_name)
+            atomics[db_name].__enter__()
+        return atomics
+
+    @classmethod
+    def _rollback_atomics(cls, atomics):
+        """Rollback atomic blocks opened through the previous method"""
+        for db_name in reversed(cls._databases_names()):
+            transaction.set_rollback(True, using=db_name)
+            atomics[db_name].__exit__(None, None, None)
+
+    @classmethod
+    def setUpTestData(cls):
+        """Load initial data for the TestCase"""
+        pass
+
+    def _should_reload_connections(self):
+        return False
+
+    def _fixture_setup(self):
+        assert not self.reset_sequences, (
+            'reset_sequences cannot be used on TestCase instances')
+        self.atomics = self._enter_atomics()
+
+    def _fixture_teardown(self):
+        self._rollback_atomics(self.atomics)
+
+    def _post_teardown(self):
+        # Monkey-patch so connections don't get closed
+        if not self._should_reload_connections():
+            real_connections_all = connections.all
+            connections.all = lambda: []
+        super(ClassFixtureTestCase, self)._post_teardown()
+        if not self._should_reload_connections():
+            connections.all = real_connections_all
+
+
+class VanillaTestCase(MockEsMixin, RedisTest, MockBrowserIdMixin):
     """Base class for all mkt tests."""
     client_class = TestClient
 
@@ -353,7 +434,7 @@ class TestCase(MockEsMixin, RedisTest, MockBrowserIdMixin, test.TestCase):
         pass
 
     def _pre_setup(self):
-        super(TestCase, self)._pre_setup()
+        super(VanillaTestCase, self)._pre_setup()
 
         # Clean the slate.
         cache.clear()
@@ -382,7 +463,7 @@ class TestCase(MockEsMixin, RedisTest, MockBrowserIdMixin, test.TestCase):
     def _post_teardown(self):
         mkt.set_user(None)
         clean_translations(None)  # Make sure queued translations are removed.
-        super(TestCase, self)._post_teardown()
+        super(VanillaTestCase, self)._post_teardown()
 
     @contextmanager
     def activate(self, locale=None):
@@ -655,6 +736,14 @@ class TestCase(MockEsMixin, RedisTest, MockBrowserIdMixin, test.TestCase):
         Returns a PyQuery object that you can refine using jQuery selectors.
         """
         return pq(pq(html)(template_selector).html())
+
+
+class TestCase(VanillaTestCase, ClassFixtureTestCase):
+    pass
+
+
+class TestCase2(VanillaTestCase, test.TestCase):
+    pass
 
 
 class MktPaths(object):
