@@ -135,6 +135,9 @@ class TestModelBase(TestCase):
         addon.update(public_stats=False)
         assert not addon.public_stats, 'addon.public_stats should be False'
 
+    def purposely_broken_test(self):
+        assert False, 'this test needs to fail'
+
 
 def test_cache_key():
     # Test that we are not taking the db into account when building our
