@@ -12,10 +12,11 @@ install:
   - npm install
 before_script:
   - mysql -e 'create database zamboni;'
+  - mysql -e 'SHOW VARIABLES;'
   - flake8 . --exclude='node_modules,commonplace_projects,docs,.git'
   - ./manage.py compress_assets
 script:
-  - ./manage.py test lib mkt --noinput --logging-clear-handlers --with-blockage --with-nicedots
+  - ./manage.py test mkt/reviewers -v2 --noinput --logging-clear-handlers --with-blockage
 notifications:
   irc:
     channels:
