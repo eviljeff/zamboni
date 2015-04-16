@@ -29,7 +29,7 @@ class WebsiteIndexer(BaseIndexer):
                 'properties': {
                     'id': {'type': 'long'},
                     'category': cls.string_not_analyzed(),
-                    'created': {'type': 'date', 'format': 'dateOptionalTime'},
+                    'created': {'format': 'dateOptionalTime'},
                     'description': {'type': 'string',
                                     'analyzer': 'default_icu',
                                     'position_offset_gap': 100},
