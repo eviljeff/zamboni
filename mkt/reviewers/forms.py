@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 
 from django import forms
+from django.db import models
 from django.forms import widgets
 
 import happyforms
@@ -97,6 +98,48 @@ class NonValidatingChoiceField(forms.ChoiceField):
         pass
 
 
+class TestedOnWidget(forms.MultiWidget):
+
+    def __init__(self, attrs=None):
+        widgets = (
+            forms.TextInput(attrs=attrs),
+            forms.TextInput(attrs=attrs),
+        )
+        super(TestedOnWidget, self).__init__(widgets, attrs)
+
+    def decompress(self, value):
+        if value:
+            return value.split('; ')[0:2]
+        return ['', '']
+
+
+class TestedOnValueField(forms.MultiValueField):
+    widget = TestedOnWidget
+
+    def __init__(self, *args, **kwargs):
+        fields = (
+            forms.CharField(),
+            forms.CharField(),
+        )
+        super(TestedOnValueField, self).__init__(fields, *args, **kwargs)
+
+    def compress(self, data_list):
+        if data_list:
+            return '; '.join(data_list)
+        return ''
+
+
+class TestedOnModelField(models.Field):
+
+    def formfield(self, **kwargs):
+        defaults = {'form_class': TestedOnValueField}
+        defaults.update(kwargs)
+        return super(TestedOnModelField, self).formfield(**defaults)
+
+    def get_internal_type(self):
+        return 'TextField'
+
+
 class MOTDForm(happyforms.Form):
     motd = forms.CharField(required=True, widget=widgets.Textarea())
 
@@ -106,7 +149,7 @@ class ReviewAppForm(happyforms.Form):
                                label=_lazy(u'Comments:'))
     canned_response = NonValidatingChoiceField(required=False)
     action = forms.ChoiceField(widget=forms.RadioSelect())
-    device_types = forms.CharField(required=False,
+    device_types = TestedOnValueField(required=False,
                                    label=_lazy(u'Device Types:'))
     browsers = forms.CharField(required=False,
                                label=_lazy(u'Browsers:'))

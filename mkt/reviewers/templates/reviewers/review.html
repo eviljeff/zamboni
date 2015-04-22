@@ -128,14 +128,14 @@
       </div>
 
       <div class="review-actions-section review-actions-tested data-toggle"
-           data-value="{{ actions_minimal|join("|") }}">
+           data-value="{{ actions_minimal|join('|') }}">
         <strong>{{ _('Tested with:') }}</strong>
         <label for="{{ form.device_types.auto_id }}">
-          {{ _('Device Types:') }}
+          {{ _('Device Type:') }}
         </label>
         {{ form.device_types }}
         <label for="{{ form.browsers.auto_id }}">
-          {{ _('Browsers:') }}
+          {{ _('Version:') }}
         </label>
         {{ form.browsers }}
         {{ form.device_types.errors }}
