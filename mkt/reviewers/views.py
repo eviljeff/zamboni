@@ -36,6 +36,7 @@ from waffle.decorators import waffle_switch
 
 import mkt
 from lib.crypto.packaged import SigningError
+from mkt.abuse.forms import AbuseViewFormSet
 from mkt.abuse.models import AbuseReport
 from mkt.access import acl
 from mkt.api.authentication import (RestOAuthAuthentication,
@@ -161,6 +162,7 @@ def queue_counts(request):
         'updates': queues_helper.get_updates_queue().count(),
         'escalated': queues_helper.get_escalated_queue().count(),
         'moderated': queues_helper.get_moderated_queue().count(),
+        'abuse': queues_helper.get_abuse_queue().count(),
         'region_cn': Webapp.objects.pending_in_region(mkt.regions.CHN).count(),
         'additional_tarako': (
             AdditionalReview.objects
@@ -607,6 +609,26 @@ def queue_moderated(request):
     return render(request, 'reviewers/queue.html',
                   context(request, reviews_formset=reviews_formset,
                           tab='moderated', page=page, flags=flags))
+
+
+@permission_required([('Apps', 'AbuseReports')])
+def queue_abuse(request):
+    """Queue for reviewing abuse reports."""
+    queues_helper = ReviewersQueuesHelper(request)
+    qs = queues_helper.get_abuse_queue()
+
+    page = paginate(request, qs, per_page=20)
+    abuse_formset = AbuseViewFormSet(request.POST or None,
+                                     queryset=page.object_list,
+                                     request=request)
+
+    if abuse_formset.is_valid():
+        abuse_formset.save()
+        return redirect(reverse('reviewers.apps.queue_abuse'))
+
+    return render(request, 'reviewers/queue.html',
+                  context(request, abuse_formset=abuse_formset,
+                          tab='abuse', page=page))
 
 
 def _get_search_form(request):

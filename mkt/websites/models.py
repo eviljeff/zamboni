@@ -52,6 +52,14 @@ class Website(ModelBase):
         with no_translation():
             return [DEVICE_TYPES[d].api_name for d in device_ids]
 
+    @property
+    def name(self):
+        return self.title
+
+    def get_url_path(self, src=None):
+        # No detail view implemented yet.
+        return '#'
+
     def is_dummy_content_for_qa(self):
         """
         Returns whether this app is a dummy app used for testing only or not.

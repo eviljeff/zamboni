@@ -165,6 +165,11 @@ class ReviewerScore(ModelBase):
             (score, user, mkt.REVIEWED_CHOICES[event], addon.id))
 
     @classmethod
+    def award_abusereport_points(cls, user, report_id):
+        # Not sure we even want to give points for this.
+        pass
+
+    @classmethod
     def get_total(cls, user):
         """Returns total points by user."""
         key = cls.get_key('get_total:%s' % user.id)
