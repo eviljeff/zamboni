@@ -2,7 +2,8 @@ import mock
 from nose.tools import eq_
 
 from lib.utils import static_url
-from mkt.site.tests import TestCase
+from mkt.abuse.models import AbuseReport
+from mkt.site.tests import TestCase, user_factory
 from mkt.websites.models import Website
 from mkt.websites.utils import website_factory
 
@@ -36,6 +37,13 @@ class TestWebsiteModel(TestCase):
     def test_get_icon_no_icon(self):
         website = Website(pk=1)
         assert website.get_icon_url(32).endswith('/default-32.png')
+
+    def test_delete(self):
+        website = website_factory()
+        AbuseReport.objects.create(reporter=user_factory(),
+                                   ip_address='123.45.67.89',
+                                   website=website, message='bad')
+        website.delete()
 
 
 class TestWebsiteESIndexation(TestCase):
